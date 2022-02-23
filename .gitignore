@@ -1,0 +1,7 @@
+data\mpii\images
+data\lsp\images
+data\lspet\images
+.idea
+cached\mpii_cache_16jnts.npy
+code\__pycache__
+code\.ipynb_checkpoints
