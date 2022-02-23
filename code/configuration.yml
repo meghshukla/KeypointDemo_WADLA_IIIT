@@ -1,0 +1,74 @@
+experiment_name: "Demo"
+
+model: {
+  load: False,
+  type: 'hourglass',                  # hourglass / hrnet
+  load_path: "None", #eg: "D:\\WADLA Demo\\Pretrained_MPII_32channels\\",
+  save_path: "None", #eg: "D:\\WADLA Demo\\",
+  aux_net: {train: False, train_auxnet_only: False, warmup: 0, method: 'None'} # --> 'load' is created internally
+}
+
+
+dataset: {
+  # After first mpii run, set precached: True
+  load: 'mpii',      # mpii / lsp / merged
+  load_all_imgs_in_memory: False,
+  mpii_params: {shuffle: True, lambda_head: 0.8, newell_validation: True, precached: False, train_ratio: 0.7},
+  lspet_params: {shuffle: False, train_ratio: 1.0},
+  lsp_params: {shuffle: False, train_ratio: 0.5}
+  # max persons key added internally for mpii_params
+  # lambda_head shifts the head joint towards the neck
+}
+
+
+active_learning: {
+  num_images: 1000,
+  algorithm: 'base',   # base, random, coreset, learning_loss, egl, entropy
+  base: {},
+  random: {},
+  learningLoss: {margin: 1, objective: 'KLdivergence'}, # KLdivergence / YooAndKweon
+  coreSet: {},
+  multiPeakEntropy: {},
+  egl: {perplexity: 20, tolerance: 0.001, k: 30, og_heatmap: False},
+  aleatoric: {},
+  bn: {}
+}
+
+# INFO: Total number of training images: {mpii: 13458, lspet: 7000, lsp: 1400}
+
+# --------- Default settings, no change needed for standard active learning usage
+
+train: True                            # Train a model from scratch or re-train an existing model.
+metric: True                           # Compute PCKh scores and save in CSV file format.
+
+experiment_settings: {
+  epochs: 125,          # Default: 100
+  lr: 0.0003,          # Default: 3e-4
+  weight_decay: 0.0,   # Default: 0.0
+  batch_size: 8,      # Default: 32
+  threshold: 0.25,
+  hm_peak: 30,
+  occlusion: True,
+  all_joints: True
+  # num_hm is created internally
+}
+
+
+architecture: {
+  hourglass: {nstack: 2, channels: 32},
+
+  hrnet: {PRETRAINED_LAYERS: ['conv1', 'bn1', 'conv2', 'bn2', 'layer1', 'transition1', 'stage2', 'transition2', 'stage3', 'transition3', 'stage4'],
+          FINAL_CONV_KERNEL: 1,
+          STAGE2: {NUM_CHANNELS: [64, 64], BLOCK: 'BASIC', NUM_BRANCHES: 2, FUSE_METHOD: 'SUM', NUM_BLOCKS: [2, 2], NUM_MODULES: 3},
+          STAGE3: {NUM_CHANNELS: [64, 64, 128, 128, 128], BLOCK: 'BASIC', NUM_BRANCHES: 5, FUSE_METHOD: 'SUM', NUM_BLOCKS: [2, 2, 2, 2, 2], NUM_MODULES: 1},
+          STAGE4: {NUM_CHANNELS: [64, 64, 128, 128, 128], BLOCK: 'BASIC', NUM_BRANCHES: 5, FUSE_METHOD: 'SUM', NUM_BLOCKS: [2, 2, 2, 2, 2], NUM_MODULES: 1}},
+
+  aux_net: {fc: [128, 64, 32, 16], conv_or_avg_pooling: 'conv'}  # conv / avg
+    # Additional keys: load, channels and spatial dimensions (for conv),  num_hm,
+  # Used for Learning Loss: [128, 64, 32, 16, 8], Final output number of nodes is determined internally
+}
+
+visualize: True
+tensorboard: False
+
+resume_training: False

@@ -1,0 +1,9 @@
+NVIDIA GPU: PyTorch compatible
+
+Python 3.8: https://docs.conda.io/en/latest/miniconda.html#windows-installers
+
+conda create --name AL4Pose python=3.8
+
+conda update -n base -c defaults conda
+
+conda install -c pytorch -c conda-forge -c anaconda pytorch opencv albumentations matplotlib numpy umap-learn scipy scikit-learn scikit-image tensorboard pandas torchaudio torchvision pyyaml seaborn jupyter
